@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/partials/sidebar.css">
+    <script src="/assets/auth.js" defer></script>
+    <script src="/assets/layout.js" defer></script>
+</head>
+<body>
+    <section>
+        <div class="container">
+            <div class="sidebar">
+                <div class="profile">
+                    <div id="auth-logged-out">
+                        <h2 class="profile__name">Welcome!</h2>
+                        <p class="profile__email">Please log in to access your tasks.</p>
+                        <form class="auth__form" id="auth-form">
+                            <input class="auth__name" id="auth-name" type="text" placeholder="Name (sign up)">
+                            <input class="auth__email" id="auth-email" type="email" placeholder="Email required">
+                            <button type="submit" class="profile__btn" id="login-button">Log In / Sign Up</button>
+                        </form>
+                    </div>
+                    <div id="auth-logged-in" style="display: none;">
+                        <figure class="profile__img">
+                            <img src="/profile.jpg" alt="Profile Picture">
+                        </figure>
+                        <h2 class="profile__name" id="profile-name"></h2>
+                        <p class="profile__email" id="profile-email"></p>
+                        <button class="profile__btn" id="logout-button" type="button">Log Out</button>
+                    </div>
+                </div>
+                <div class="sidebar-buttons">
+                    <a href="#" class="sidebar-button">🏠 Home</a>
+                    <a href="/Tasks-Simplified/index.html" class="sidebar-button">📋 Task List</a>
+                    <a href="#" class="sidebar-button">🎨 Digital Vision Board</a>
+                    <a href="#" class="sidebar-button">🧮 Macro Calculator</a>
+                    <a href="#" class="sidebar-button">💪🏻 Workout/Meal Planner</a>
+                    <a href="#" class="sidebar-button">💰 Monthly Tracker</a>
+                    <a href="#" class="sidebar-button">😊 Mood Tracker</a>
+                    <a href="#" class="sidebar-button">⏳ Countdown Timer</a>
+                    <a href="/QOTD/index.html" class="sidebar-button">💬 QOTD Generator</a>
+                </div>
+            </div>
+        </section>
+    </body>
+</html>

@@ -6,89 +6,76 @@
     <title>Quote of the Day Generator</title>
     <link rel="stylesheet" href="style.css">
     <script src="script.js" defer></script>
+    <script src="/assets/site.js" defer></script>
+    <script src="/assets/auth.js" defer></script>
+    <script src="/assets/layout.js" defer></script>
+    <link rel="stylesheet" href="/partials/sidebar.css">
 </head>
 <body>
-    <header>
-        <div class="logo">
-            <span id="app-title">Quote of the Day Generator</span>
-        </div>
-        <div class="date-display">
-            <div class="day" id="currentDay">Today</div>
-            <div class="full-date" id="currentDate"></div>
-        </div>
-    </header>
-    <div class="container">
-        <div class="sidebar">
-            <div class="profile">
-                <div class="profile-img">
-
+    <section class="shell">
+        <div id="sidebar-mount"></div>
+        <div class="shell__content">        
+            <header>
+                <div class="logo">
+                    <img class="logo__img" src="/QOTD/info/logo.png" alt="Logo">
+                    <span class="app-title" id="app-title">Quote of the Day Generator</span>
                 </div>
-                <div class="profile-name" id="profileName">
-                    
+                <div class="date-display">
+                    <div class="day" id="currentDay">Today</div>
+                    <div class="full-date" id="currentDate"></div>
                 </div>
-                <div class="profile-email" id="profileEmail">
-
-                </div>
-            </div>
-            <div class="sidebar-buttons">
-                <button class="sidebar-button">📋 Task List</button>
-                <button class="sidebar-button">🎨 Digital Vision Board</button>
-                <button class="sidebar-button">🧮 Macro Calculator</button>
-                <button class="sidebar-button">💪🏻 Workout/Meal Planner</button>
-                <button class="sidebar-button">💰 Monthly Tracker</button>
-                <button class="sidebar-button">😊 Mood Tracker</button>
-                <button class="sidebar-button">⏳ Countdown Timer</button>
-                <button class="sidebar-button">💬 QOTD Generator</button>
-            </div>
-        </div>
-        <div class="main-content">
-            <div class="qotd">
-                <div class="qotd__intro">
-                    <span class="qotd__icon">💬</span>
-                    <h1 class="qotd__title">QOTD Generator</h1>
-                    <p class="qotd__description">Get inspired with a new quote every day!</p>
-                </div>
-                <div class="qotd__quote--display">
-                    <h2 class="qotd__section--title">Today's Quote</h2>
-                    <p id="quote-element" class="qotd__quote--text"></p>
-                    <p id="quote-empty" class="qotd__quote">No quote available</p>
-                    <div class="qotd__button--group">
-                        <button id="generate-quote-button" class="qotd__button qotd__button--generate">Generate Quote</button>
-                        <button id="favorite-quote-button" class="qotd__button qotd__button--favorite">❤️ Favorite</button>
-                    </div>                
-                </div>
-                <form class="qotd__form" id="quote-form">
-                    <h3 class="qotd__form--title">Add your own Quote</h3>
-                    <p class="qotd__form--description">
-                        They will be added to the pool of quotes and may appear as the quote of the day for you or other users!
-                    </p>
-                    <div class="qotd__form--group">
-                        <label for="quote-input" class="qotd__label">Your Quote:</label>
-                        <input type="text" id="quote-input" class="qotd__input" placeholder="Enter your quote here">
+            </header>
+            <div class="container">
+                <div class="main-content">
+                    <div class="qotd">
+                        <div class="qotd__intro">
+                            <img class="logo__img" src="/QOTD/info/logo.png" alt="Logo">
+                            <h1 class="qotd__title">QOTD Generator</h1>
+                            <p class="qotd__description">Get inspired with a new quote every day!</p>
+                        </div>
+                        <div class="qotd__quote--display">
+                            <h2 class="qotd__section--title">Today's Quote</h2>
+                            <p id="quote-element" class="qotd__quote--text"></p>
+                            <p id="quote-empty" class="qotd__quote">No quote available</p>
+                            <div class="qotd__button--group">
+                                <button id="generate-quote-button" class="qotd__button qotd__button--generate">Generate Quote</button>
+                                <button id="favorite-quote-button" class="qotd__button qotd__button--favorite">❤️ Favorite</button>
+                            </div>                
+                        </div>
+                        <form class="qotd__form" id="quote-form">
+                            <h3 class="qotd__form--title">Add your own Quote</h3>
+                            <p class="qotd__form--description">
+                                They will be added to the pool of quotes and may appear as the quote of the day for you or other users!
+                            </p>
+                            <div class="qotd__form--group">
+                                <label for="quote-input" class="qotd__label">Your Quote:</label>
+                                <input type="text" id="quote-input" class="qotd__input" placeholder="Enter your quote here">
+                            </div>
+                            <button type="submit" id="submit-quote-button" class="qotd__button qotd__button--submit">Submit Quote
+                            </button>
+                        </form>
+                        <div class="qotd__favorites">
+                            <h2 class="qotd__section--title">Favorite Quotes</h2>
+                            <ul id="favorite-quotes-list" class="qotd__favorites--list">
+                                <li class="qotd__favorite-item">
+                                    <p class="qotd__favorite-quote">❤️ Example Quote</p>
+                                    <button class="qotd__button qotd__button--remove-favorite">Remove</button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="qotd__personal">
+                            <h2 class="qotd__section--title">Your Personal Quotes</h2>
+                            <ul id="personal-quotes-list" class="qotd__personal--list">
+                                <li class="qotd__personal-item">
+                                    <p class="qotd__personal-quote"> ❤️ Example Personal Quote</p>
+                                    <button class="qotd__button qotd__button--remove-personal">Remove</button>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
-                    <button type="submit" id="submit-quote-button" class="qotd__button qotd__button--submit">Submit Quote
-                    </button>
-                </form>
-                <div class="qotd__favorites">
-                    <h2 class="qotd__section--title">Favorite Quotes</h2>
-                    <ul id="favorite-quotes-list" class="qotd__favorites--list">
-                        <li class="qotd__favorite-item">
-                            <p class="qotd__favorite-quote">❤️ Example Quote</p>
-                            <button class="qotd__button qotd__button--remove-favorite">Remove</button>
-                        </li>
-                    </ul>
-                </div>
-                <div class="qotd__personal">
-                    <h2 class="qotd__section--title">Your Personal Quotes</h2>
-                    <ul id="personal-quotes-list" class="qotd__personal--list">
-                        <li class="qotd__personal-item">
-                            <p class="qotd__personal-quote"> ❤️ Example Personal Quote</p>
-                            <button class="qotd__button qotd__button--remove-personal">Remove</button>
-                        </li>
-                    </ul>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 </body>
 </html>

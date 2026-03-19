@@ -5,32 +5,125 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <script src="https://kit.fontawesome.com/41cda13e3c.js" crossorigin="anonymous"></script>
+    <script src="script.js" defer></script>
+    <script src="/assets/site.js" defer></script>
+    <script src="/assets/auth.js" defer></script>
+    <script src="/assets/layout.js" defer></script>
+    <link rel="stylesheet" href="/partials/sidebar.css">
+    <link rel="stylesheet" href="style.css">
+
 </head>
 <body>
-    <header>
-        <figure class="logo">
-            <img src="./assets/logo.png" alt="Logo">
-        </figure>
-        <h1 class="nav__title">TasksSimplified</h1>
-        <input type="text" class="nav__search" placeholder="Search your task here...">
-        <button class="nav__search-button"><i class="fa-solid fa-magnifying-glass"></i></button>
-        <div class="date">
-            <p class="date__day">Monday</p>
-            <p class="date__date">April 27, 2024</p>
-        </div>
-    </header>
-    <section>
-        <div class="container">
-            <div class="sidebar">
-                <div class="profile">
-                    <figure class="profile__img">
-                        <img src="./assets/profile.jpg" alt="Profile Picture">
+    <section class="shell">
+        <div id="sidebar-mount"></div>
+        <div class="shell__content">
+            <header>
+                <div class="logo__wrapper">
+                    <figure class="logo">
+                        <img src="./info/logo.png" alt="Logo">
                     </figure>
-                    <h2 class="profile__name">Bella Whiskers</h2>
-                    <p class="profile__email">bella.whiskers@example.com</p>
+                    <span class="app-title">Tasks Simplified</span>
                 </div>
-                <button class="sidebar__button"><i class="fa-solid fa-house"></i> Home</button>
-                <button class="sidebar__button"><i class="fa-solid fa-list"></i> Tasks</button>
+                <div class="date-display">
+                    <div class="day" id="currentDay">Today</div>
+                    <div class="full-date" id="currentDate"></div>
+                </div>
+            </header>
+            <div class="search-bar">
+                <input type="text" class="nav__search" placeholder="Search your task here...">
+                <button class="nav__search-button"><i class="fa-solid fa-magnifying-glass"></i></button>
+            </div>
+            <div class="container">
+                <div class="main-content">
+                    <div class="ts">
+                        <div class="ts__intro">
+                            <h1 class="ts__title">Your Tasks</h1>
+                            <p class="ts__description">Organize your day and boost your productivity with our simple task manager.</p>
+                        </div>
+                        <button class="add-task-circle-btn" id="addTaskBtn">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </button>
+                        <div class="tasks-wrapper" id="tasks-wrapper">
+                            <!-- Tasks will be dynamically added here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="taskModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 id="modalTitle">Add New Task</h2>
+                        <a href="#" class="go-back" id="closeModalBtn">Go Back</a>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="taskTitle">Title</label>
+                            <input type="text" id="taskTitle" class="form-input" />
+                        </div>
+                        <div class="form-group">
+                            <label for="taskDate">Date</label>
+                            <div class="date-input-container">
+                                <input type="text" id="taskDate" class="form-input" />
+                                <span class="calendar-icon">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="16"
+                                        height="16"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    >
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                                    </svg>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Priority</label>
+                            <div class="priority-options">
+                                <div class="priority-option">
+                                    <span class="priority-dot extreme"></span>
+                                    <span>Extreme</span>
+                                    <input type="radio" name="priority" value="extreme">
+                                </div>
+                                <div class="priority-option">
+                                    <span class="priority-dot moderate"></span>
+                                    <span>Moderate</span>
+                                    <input type="radio" name="priority" value="moderate">
+                                </div>
+                                <div class="priority-option">
+                                    <span class="priority-dot low"></span>
+                                    <span>Low</span>
+                                    <input type="radio" name="priority" value="low">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="taskDescription">Task Description</label>
+                            <textarea id="taskDescription" class="textarea-input" placeholder="Start writing here..."></textarea>
+                        </div>
+                        <button class="done-btn" id="saveTaskBtn">Done</button>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
