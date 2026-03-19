@@ -25,8 +25,8 @@
                     <span class="app-title">Tasks Simplified</span>
                 </div>
                 <div class="search-bar">
-                    <input type="text" class="search-input" placeholder="Search your task here...">
-                    <button class="search-button"><i class="fa-solid fa-magnifying-glass"></i></button>
+                    <input type="text" class="nav__search" placeholder="Search your task here...">
+                    <button class="nav__search-button"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </div>
                 <div class="date-display">
                     <div class="day" id="currentDay">Today</div>
@@ -58,6 +58,10 @@
                                 </svg>
                             </button>
                         </header>
+                        <div class="tabs">
+                            <button class="tab-btn is-active" data-tab="inprogress" type="button">In Progress</button>
+                            <button class="tab-btn" data-tab="completed" type="button">Completed</button>
+                        </div>
                         <div class="tasks-wrapper" id="tasks-wrapper">
                             <!-- Tasks will be dynamically added here -->
                         </div>

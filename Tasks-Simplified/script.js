@@ -43,21 +43,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-function openAddTaskModal() {
-  // ...other reset code...
-
-  const displayInput = document.getElementById("taskDate");
-  const pickerInput = document.getElementById("taskDatePicker");
-
-  const now = new Date();
-  const ymd = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-
-  if (pickerInput) pickerInput.value = ymd;
-  if (displayInput) displayInput.value = `${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}-${now.getFullYear()}`;
-
-  taskModal.style.display = "flex";
-}
-
 // 
 
 // Sample task data for initial display
@@ -68,7 +53,7 @@ const sampleTasks = [
     description:
       "Go through all lessons in Module 2, ensuring you pause to take notes and code along actively. This module introduces real-world projects, so take the time to understand how the concepts from Module 1 are applied in practical scenarios.",
     priority: "Extreme",
-    date: "20/05/2025",
+    date: "05-20-2025",
     completed: false,
   },
   {
@@ -87,6 +72,7 @@ const sampleTasks = [
 // Store tasks in memory
 let tasks = [...sampleTasks];
 let editingTaskId = null;
+let activeTab = "inprogress"; // default tab
 
 // DOM Elements
 const taskModal = document.getElementById("taskModal");
@@ -98,8 +84,10 @@ const tasksWrapper = document.querySelector(".tasks-wrapper");
 const taskDetailsPanel = document.querySelector(".task-details");
 const addTaskBtn = document.getElementById("addTaskBtn");
 const closeModalBtn = document.getElementById("closeModalBtn");
-const searchInput = document.querySelector(".search-input");
-const searchButton = document.querySelector(".search-button");
+const searchInput = document.querySelector(".nav__search");
+const searchButton = document.querySelector(".nav__search-button");
+const taskDateDisplayInput = document.getElementById("taskDate");      // MM-DD-YYYY
+const taskDatePickerInput = document.getElementById("taskDatePicker"); // YYYY-MM-DD (hidden picker)
 
 // DOMCONTENTLOADED EVENT
 document.addEventListener("DOMContentLoaded", function () {
@@ -114,8 +102,28 @@ document.addEventListener("DOMContentLoaded", function () {
   addTaskBtn.addEventListener("click", openAddTaskModal);
   closeModalBtn.addEventListener("click", closeModal);
   saveTaskBtn.addEventListener("click", saveTask);
-  searchButton.addEventListener("click", searchTasks);
-  searchInput.addEventListener("input", searchTasks);
+  if (searchButton) searchButton.addEventListener("click", searchTasks);
+  if (searchInput) searchInput.addEventListener("input", searchTasks);
+
+  // TAB BUTTONS
+  document.querySelectorAll(".tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      activeTab = btn.dataset.tab;
+
+      // highlight active button
+      document.querySelectorAll(".tab-btn").forEach((b) => {
+        b.classList.toggle("is-active", b === btn);
+      });
+
+      // re-render list
+      renderTasks();
+
+      // select first task in this tab so details show
+      const visible = getVisibleTasks();
+      if (visible.length > 0) selectTask(visible[0].id);
+      else taskDetailsPanel.innerHTML = "";
+    });
+  });
 
   // Close modal on outside click
   window.addEventListener("click", function (event) {
@@ -125,15 +133,30 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
+function getVisibleTasks() {
+  if (activeTab === "completed") {
+    return tasks.filter((t) => t.completed);
+  }
+  return tasks.filter((t) => !t.completed);
+}
+
 // CREATING AND RENDERING ELEMENTS
 function renderTasks() {
   tasksWrapper.innerHTML = "";
-  if (tasks.length === 0) {
-    showEmptyState();
+
+  const visibleTasks = getVisibleTasks();
+
+  if (visibleTasks.length === 0) {
+    tasksWrapper.innerHTML = `
+      <div class="empty-state">
+        <p>No tasks in this tab yet.</p>
+      </div>
+    `;
+    taskDetailsPanel.innerHTML = "";
     return;
   }
 
-  tasks.forEach((task) => {
+  visibleTasks.forEach((task) => {
     const taskCard = createTaskCard(task);
     tasksWrapper.appendChild(taskCard);
   });
@@ -238,6 +261,29 @@ function selectTask(taskId) {
     .addEventListener("click", () => deleteTask(taskId));
 }
 
+function openEditTaskModal(taskId) {
+  const task = tasks.find((t) => t.id === taskId);
+  if (!task) return;
+
+  editingTaskId = taskId;
+  modalTitle.textContent = "Edit Task";
+  taskTitleInput.value = task.title;
+  taskDescriptionInput.value = task.description;
+
+  // Task date is stored as MM-DD-YYYY
+  if (taskDateDisplayInput) taskDateDisplayInput.value = task.date;
+
+  // Also sync hidden picker so the calendar opens on the same date
+  if (taskDatePickerInput) taskDatePickerInput.value = mdyToYmdLoose(task.date);
+
+  // Set priority radio (values are lowercase in HTML)
+  document.querySelectorAll('input[name="priority"]').forEach((radio) => {
+    radio.checked = radio.value.toLowerCase() === task.priority.toLowerCase();
+  });
+
+  taskModal.style.display = "flex";
+}
+
 // HELPER FUNCTIONS
 // truncate text with ellipsis
 function truncateText(text, maxLength) {
@@ -259,19 +305,17 @@ function showEmptyState() {
 // Toggle task completion status
 function toggleTaskCompletion(taskId) {
   const taskIndex = tasks.findIndex((t) => t.id === taskId);
-  if (taskIndex !==-1) {
-    tasks[taskIndex].completed = !tasks[taskIndex].completed;
-    
-    // update the UI
-    const statusCircle = document.querySelector(
-      `.task-card[data-id="${taskId}"] .status-circle`);
-    if (statusCircle) {
-      statusCircle.classList.toggle("completed", tasks[taskIndex].completed);
-    }
+  if (taskIndex === -1) return;
 
-    // Re-select the task to update details panel
-    selectTask(taskId);
-  }
+  tasks[taskIndex].completed = !tasks[taskIndex].completed;
+
+  // redraw list (so it moves between tabs)
+  renderTasks();
+
+  // pick a task to show in details (first visible in current tab)
+  const visible = getVisibleTasks();
+  if (visible.length > 0) selectTask(visible[0].id);
+  else taskDetailsPanel.innerHTML = "";
 }
 
 // FORM HANDLING
@@ -295,22 +339,24 @@ function openAddTaskModal() {
 }
 
 //Open modal to edit existing task
-function openEditTaskModal(taskId) {
-  const task = tasks.find((t) => t.id === taskId);
-  if (!task) return;
+function openAddTaskModal() {
+  editingTaskId = null;
+  modalTitle.textContent = "Add New Task";
+  taskTitleInput.value = "";
+  taskDescriptionInput.value = "";
 
-  editingTaskId = taskId;
-  modalTitle.textContent = "Edit Task";
-  taskTitleInput.value = task.title;
-  taskDescriptionInput.value = task.description;
+  // Set date to today (store/display as MM-DD-YYYY)
+  const now = new Date();
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const dd = String(now.getDate()).padStart(2, "0");
+  const yyyy = now.getFullYear();
 
-  // set date (task.date is assumed to be MM-DD-YYYY)
-  taskDateDisplayInput.value = task.date;
-  if (taskDatePickerInput) taskDatePickerInput.value = mdyToYmdLoose(task.date);
+  if (taskDateDisplayInput) taskDateDisplayInput.value = `${mm}-${dd}-${yyyy}`;
+  if (taskDatePickerInput) taskDatePickerInput.value = `${yyyy}-${mm}-${dd}`;
 
-  // set priority radio
+  // Set default priority (low)
   document.querySelectorAll('input[name="priority"]').forEach((radio) => {
-    radio.checked = radio.value.toLowerCase() === task.priority.toLowerCase();
+    radio.checked = radio.value.toLowerCase() === "low";
   });
 
   taskModal.style.display = "flex";
@@ -323,6 +369,8 @@ function saveTask() {
     alert("Please enter a task title.");
     return;
   }
+  
+  const taskDateDisplayInput = document.getElementById("taskDate");
 
   // Get selected Priority
   let selectedPriority = "Low"; // default
@@ -339,7 +387,7 @@ function saveTask() {
       title: taskTitleInput.value.trim(),
       description: taskDescriptionInput.value.trim(),
       priority: selectedPriority,
-      date: taskDateInput.value,
+      date: taskDateDisplayInput.value,
       completed: false,
     };
     tasks.unshift(newTask); // add to the beginning
@@ -352,7 +400,7 @@ function saveTask() {
       tasks[taskIndex].title = taskTitleInput.value.trim();
       tasks[taskIndex].description = taskDescriptionInput.value.trim();
       tasks[taskIndex].priority = selectedPriority;
-      tasks[taskIndex].date = taskDateInput.value;
+      tasks[taskIndex].date = taskDateDisplayInput.value;
       renderTasks();
       selectTask(editingTaskId);
     }
@@ -389,9 +437,9 @@ function searchTasks() {
     return;
   }
 
-  const filteredTasks = tasks.filter((task) => {
-    task.title.toLowerCase().includes(searchTerm);
-  });
+  const filteredTasks = tasks.filter((task) =>
+  task.title.toLowerCase().includes(searchTerm)
+  );
 
   if (filteredTasks.length === 0) {
     tasksWrapper.innerHTML = `
