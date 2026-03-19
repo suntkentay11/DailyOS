@@ -24,41 +24,46 @@
                     </figure>
                     <span class="app-title">Tasks Simplified</span>
                 </div>
+                <div class="search-bar">
+                    <input type="text" class="search-input" placeholder="Search your task here...">
+                    <button class="search-button"><i class="fa-solid fa-magnifying-glass"></i></button>
+                </div>
                 <div class="date-display">
                     <div class="day" id="currentDay">Today</div>
                     <div class="full-date" id="currentDate"></div>
                 </div>
             </header>
-            <div class="search-bar">
-                <input type="text" class="nav__search" placeholder="Search your task here...">
-                <button class="nav__search-button"><i class="fa-solid fa-magnifying-glass"></i></button>
-            </div>
             <div class="container">
                 <div class="main-content">
-                    <div class="ts">
-                        <div class="ts__intro">
-                            <h1 class="ts__title">Your Tasks</h1>
-                            <p class="ts__description">Organize your day and boost your productivity with our simple task manager.</p>
-                        </div>
-                        <button class="add-task-circle-btn" id="addTaskBtn">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="16"
-                                height="16"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                            >
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                            </svg>
-                        </button>
+                    <div class="tasks-column">
+                        <header class="task-column-header">
+                            <div class="column-header-container">
+                                <h1 class="column__title">Your Tasks</h1>
+                                <p class="column__description">Organize your day and boost your productivity with our simple task manager.</p>
+                            </div>
+                            <button class="add-task-circle-btn" id="addTaskBtn">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="16"
+                                    height="16"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                            </button>
+                        </header>
                         <div class="tasks-wrapper" id="tasks-wrapper">
                             <!-- Tasks will be dynamically added here -->
                         </div>
+                    </div>
+                    <div class="task-details">
+                        <!-- Task details will be dynamically added here -->
                     </div>
                 </div>
             </div>
@@ -76,8 +81,12 @@
                         <div class="form-group">
                             <label for="taskDate">Date</label>
                             <div class="date-input-container">
-                                <input type="text" id="taskDate" class="form-input" />
-                                <span class="calendar-icon">
+                                <!-- Visible formatted value -->
+                                <input type="text" id="taskDate" class="form-input" placeholder="MM-DD-YYYY" readonly />
+
+                                <!-- Hidden native picker -->
+                                <input type="date" id="taskDatePicker" class="date-picker-hidden" aria-hidden="true" tabindex="-1" />
+                                <button type="button" class="calendar-icon" aria-label="Open calendar">
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
                                         width="16"
@@ -94,7 +103,7 @@
                                         <line x1="8" y1="2" x2="8" y2="6"></line>
                                         <line x1="3" y1="10" x2="21" y2="10"></line>
                                     </svg>
-                                </span>
+                                </button>
                             </div>
                         </div>
                         <div class="form-group">

@@ -22,7 +22,10 @@ html, body {
 
 .shell__content{
     background-color: #cbb9a2;
+    display: flex;
+    flex-direction: column;
     width: 100%;
+    margin: 0 auto;
 }
 
 header {
@@ -50,7 +53,7 @@ header {
 }
 
 .date-display{
-    font-size: 14px;
+    font-size: 20px;
     color: #2f2f33;
     opacity: 0.7;
     display: flex;
@@ -126,9 +129,16 @@ body {
     background-color: #5a6168;
 }
 
-.ts{
+.main-content {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.tasks-column {
     width: 100%;
-    max-width: 800px;
+    flex: 1;
+    max-width: none;
     margin: 0 auto;
     text-align: center;
     background-color: #f3f1ec;
@@ -137,16 +147,33 @@ body {
     border-radius: 12px;
 }
 
-.ts__intro {
-    margin-bottom: 20px;
+.task-details{
+    width: 360px;
+    background-color: #f3f1ec;
+    border: 1px solid #9ea8b2;
+    border-radius: 12px;
+    padding: 20px;
 }
 
-.ts__title {
+.tasks-column-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.column-header-container {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.column__title {
     font-size: 32px;
     margin-bottom: 16px;
 }
 
-.ts__description {
+.column__description {
     font-size: 16px;
     color: #5a6168;
 }
@@ -171,6 +198,15 @@ body {
 .add-task-circle-btn:hover {
     background-color: #9a84db;
 }
+
+
+
+
+/* 
+
+TABS
+
+*/
 
 .tabs {
   display: flex;
@@ -204,4 +240,373 @@ body {
   list-style: none;
   padding: 0;
   margin: 0;
+}
+
+.tasks-wrapper{
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 5px;
+    margin-top: 10px;
+}
+
+/* 
+
+TASK CARD
+
+*/
+
+.task-card{
+    border: 1px solid #9ea8b2;
+    background-color: #f3f1ec;
+    border-radius: 10px;
+    padding: 15px;
+    margin: 8px 2px;
+    cursor: pointer;
+}
+
+.task-status{
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.task-title{
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.task-description{
+    font-size: 14px;
+    color: #5a6168;
+    margin-bottom: 10px;
+}
+
+.task-info{
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #5a6168;
+}
+
+/* 
+
+STATUS CIRCLES
+
+*/
+
+.status-circle{
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid #9a84db;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.status-circle.completed{
+    background-color: #9a84db;
+    color: #2f2f33;
+}
+
+/* 
+
+HOVER AND SELECTION STATES
+
+*/
+
+.task-card:hover {
+    box-shadow: 0 0 0 2px #e0d8c3;
+}
+
+.task-card.selected {
+    box-shadow: 0 0 0 2px #9a84db;
+}
+
+.done-btn {
+    background-color: #b9a6e8;
+    color: #2f2f33;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    margin-top: 20px;
+}
+
+/* 
+
+DECORATIVE ELEMENTS
+
+*/
+
+.column-header::after{
+    content: '';
+    display: block;
+    width: 75px;
+    height: 3px;
+    background-color: #9a84db;
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+}
+
+.modal-header h2::after{
+    content: '';
+    display: block;
+    width: 80px;
+    height: 3px;
+    background-color: #9a84db;
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+}
+
+/* 
+
+COLOR SYSTEM
+
+*/
+
+.extreme{
+    color: #c47a6c;
+    font-weight: 500;
+}
+
+.moderate{
+    color: #7f95a6;
+    font-weight: 500;
+}
+
+.low{
+    color: #8faf9a;
+    font-weight: 500;
+}
+
+.priority-dot.extreme{
+    background-color: #c47a6c;
+}
+
+.priority-dot.moderate{
+    background-color: #7f95a6;
+}
+
+.priority-dot.low{
+    background-color: #8faf9a;
+}
+
+/* 
+
+TASK DETAILS STYLING
+
+*/
+
+.task-detail-header{
+    margin-bottom: 20px;
+}
+
+.task-detail-header h2{
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.detail-meta{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.detail-meta-item{
+    font-size: 14px;
+    color: #5a6168;
+}
+
+.meta-label{
+    font-weight: 500;
+    margin-right: 5px;
+}
+
+.detail-description{
+    margin: 20px 0;
+    padding: 10px 0;
+}
+
+.detail-description p{
+    font-size: 14px;
+    color: #5a6168;
+    line-height: 1.6;
+}
+
+/* 
+
+ACTION BUTTONS
+
+*/
+
+.action-buttons{
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 30px;
+}
+
+.action-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+}
+
+.action-btn.btn-secondary {
+    background-color: #b9a6e8;
+    color: #9a84db;
+}
+
+.action-btn.btn-primary {
+    background-color: #c47a6c;
+    color: #5a6168;
+}
+
+/* 
+
+MODAL STYLING
+
+*/
+
+.modal{
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+}
+
+.modal-content{
+    background-color: #f3f1ec;
+    padding: 20px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 600px;
+    height: 90%;
+    max-height: 550px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.modal-header{
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    justify-content: space-between;
+}
+
+.modal-header h2{
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.go-back{
+    color: #5a6168;
+    text-decoration: none;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #2f2f33;
+}
+
+.form-input, .textarea-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #9ea8b2;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.3s ease;
+}
+
+.textarea-input{
+    height: 100px;
+    resize: none;
+}
+
+.date-input-container {
+  position: relative;
+}
+
+#taskDate {
+  padding-right: 40px; /* room for icon */
+}
+
+.date-picker-hidden {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+
+.calendar-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: 0;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.priority-options{
+    display: flex;
+    gap: 20px;
+}
+
+.priority-option{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.priority-dot{
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.task-description{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.empty-state{
+    padding: 20px;
+    text-align: center;
+    color: #5a6168;
+    margin-top: 20px;
 }

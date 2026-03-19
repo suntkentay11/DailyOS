@@ -1,117 +1,423 @@
-const STORAGE_CURRENT = "tasks.current";
-const STORAGE_PAST = "tasks.past";
+// CALENDAR INPUT ENHANCEMENT
 
-function loadTasks(key) {
-  try {
-    return JSON.parse(localStorage.getItem(key)) ?? [];
-  } catch {
-    return [];
-  }
+function pad2(n) {
+  return String(n).padStart(2, "0");
 }
 
-function saveTasks(key, tasks) {
-  localStorage.setItem(key, JSON.stringify(tasks));
+function ymdToMdy(ymd) {
+  // ymd: "YYYY-MM-DD"
+  if (!ymd || !/^\d{4}-\d{2}-\d{2}$/.test(ymd)) return "";
+  const [y, m, d] = ymd.split("-");
+  return `${m}-${d}-${y}`; // "MM-DD-YYYY"
 }
 
-function switchTab(tab) {
-  document.querySelectorAll(".tab-btn").forEach((b) => {
-    b.classList.toggle("is-active", b.dataset.tab === tab);
-  });
-
-  document.getElementById("tab-current").classList.toggle("is-active", tab === "current");
-  document.getElementById("tab-past").classList.toggle("is-active", tab === "past");
-}
-
-function render() {
-  const current = loadTasks(STORAGE_CURRENT);
-  const past = loadTasks(STORAGE_PAST);
-
-  const currentList = document.getElementById("current-list");
-  const pastList = document.getElementById("past-list");
-
-  currentList.innerHTML = "";
-  pastList.innerHTML = "";
-
-  current.forEach((t, idx) => {
-    const li = document.createElement("li");
-    li.innerHTML = `
-      <span>${t.text}</span>
-      <button type="button" data-action="complete" data-index="${idx}">Complete</button>
-    `;
-    currentList.appendChild(li);
-  });
-
-  past.forEach((t, idx) => {
-    const li = document.createElement("li");
-    li.innerHTML = `
-      <span>${t.text}</span>
-      <button type="button" data-action="restore" data-index="${idx}">Restore</button>
-      <button type="button" data-action="delete" data-index="${idx}">Delete</button>
-    `;
-    pastList.appendChild(li);
-  });
-}
-
-function completeTask(index) {
-  const current = loadTasks(STORAGE_CURRENT);
-  const past = loadTasks(STORAGE_PAST);
-
-  const [task] = current.splice(index, 1);
-  if (!task) return;
-
-  task.completedAt = new Date().toISOString();
-  past.unshift(task);
-
-  saveTasks(STORAGE_CURRENT, current);
-  saveTasks(STORAGE_PAST, past);
-  render();
-}
-
-function restoreTask(index) {
-  const current = loadTasks(STORAGE_CURRENT);
-  const past = loadTasks(STORAGE_PAST);
-
-  const [task] = past.splice(index, 1);
-  if (!task) return;
-
-  delete task.completedAt;
-  current.unshift(task);
-
-  saveTasks(STORAGE_CURRENT, current);
-  saveTasks(STORAGE_PAST, past);
-  render();
-}
-
-function deletePastTask(index) {
-  const past = loadTasks(STORAGE_PAST);
-  past.splice(index, 1);
-  saveTasks(STORAGE_PAST, past);
-  render();
+function mdyToYmd(mdy) {
+  // mdy: "MM-DD-YYYY"
+  if (!mdy || !/^\d{2}-\d{2}-\d{4}$/.test(mdy)) return "";
+  const [m, d, y] = mdy.split("-");
+  return `${y}-${m}-${d}`;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  // tab switching
-  document.querySelectorAll(".tab-btn").forEach((btn) => {
-    btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+  const displayInput = document.getElementById("taskDate");          // text field (MM-DD-YYYY)
+  const pickerInput = document.getElementById("taskDatePicker");     // hidden type=date
+  const calendarBtn = document.querySelector(".calendar-icon");
+
+  if (!displayInput || !pickerInput || !calendarBtn) return;
+
+  // default: today
+  const now = new Date();
+  const ymd = `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}`;
+  pickerInput.value = ymd;
+  displayInput.value = ymdToMdy(ymd);
+
+  // open picker when icon is clicked
+  calendarBtn.addEventListener("click", () => {
+    if (typeof pickerInput.showPicker === "function") pickerInput.showPicker();
+    else pickerInput.click();
   });
 
-  // clicks in lists (event delegation)
-  document.getElementById("current-list").addEventListener("click", (e) => {
-    const btn = e.target.closest("button[data-action]");
-    if (!btn) return;
-    if (btn.dataset.action === "complete") completeTask(Number(btn.dataset.index));
+  // whenever user picks a date, update visible formatted field
+  pickerInput.addEventListener("change", () => {
+    displayInput.value = ymdToMdy(pickerInput.value);
   });
-
-  document.getElementById("past-list").addEventListener("click", (e) => {
-    const btn = e.target.closest("button[data-action]");
-    if (!btn) return;
-
-    const idx = Number(btn.dataset.index);
-    if (btn.dataset.action === "restore") restoreTask(idx);
-    if (btn.dataset.action === "delete") deletePastTask(idx);
-  });
-
-  // initial
-  switchTab("current");
-  render();
 });
+
+function openAddTaskModal() {
+  // ...other reset code...
+
+  const displayInput = document.getElementById("taskDate");
+  const pickerInput = document.getElementById("taskDatePicker");
+
+  const now = new Date();
+  const ymd = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
+  if (pickerInput) pickerInput.value = ymd;
+  if (displayInput) displayInput.value = `${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}-${now.getFullYear()}`;
+
+  taskModal.style.display = "flex";
+}
+
+// 
+
+// Sample task data for initial display
+const sampleTasks = [
+  {
+    id: 1,
+    title: "Module 2: Build and Apply",
+    description:
+      "Go through all lessons in Module 2, ensuring you pause to take notes and code along actively. This module introduces real-world projects, so take the time to understand how the concepts from Module 1 are applied in practical scenarios.",
+    priority: "Extreme",
+    date: "20/05/2025",
+    completed: false,
+  },
+  {
+    id: 2,
+    title: "Module 1: The Foundations",
+    description:
+      "Go through all lessons inside Module 1 at your own pace. As you progress, make detailed notes to reinforce your understanding and practice writing the code alongside the instructor.",
+    priority: "Extreme",
+    date: "01/05/2025",
+    completed: true,
+  },
+];
+
+// INITIAL SET UP AND DOM ELEMENTS
+
+// Store tasks in memory
+let tasks = [...sampleTasks];
+let editingTaskId = null;
+
+// DOM Elements
+const taskModal = document.getElementById("taskModal");
+const modalTitle = document.getElementById("modalTitle");
+const taskTitleInput = document.getElementById("taskTitle");
+const taskDescriptionInput = document.getElementById("taskDescription");
+const saveTaskBtn = document.getElementById("saveTaskBtn");
+const tasksWrapper = document.querySelector(".tasks-wrapper");
+const taskDetailsPanel = document.querySelector(".task-details");
+const addTaskBtn = document.getElementById("addTaskBtn");
+const closeModalBtn = document.getElementById("closeModalBtn");
+const searchInput = document.querySelector(".search-input");
+const searchButton = document.querySelector(".search-button");
+
+// DOMCONTENTLOADED EVENT
+document.addEventListener("DOMContentLoaded", function () {
+  renderTasks();
+  if (tasks.length > 0) {
+    selectTask(tasks[0].id);
+  } else {
+    showEmptyState();
+  }
+
+  // Event Listeners
+  addTaskBtn.addEventListener("click", openAddTaskModal);
+  closeModalBtn.addEventListener("click", closeModal);
+  saveTaskBtn.addEventListener("click", saveTask);
+  searchButton.addEventListener("click", searchTasks);
+  searchInput.addEventListener("input", searchTasks);
+
+  // Close modal on outside click
+  window.addEventListener("click", function (event) {
+    if (event.target === taskModal) {
+      closeModal();
+    }
+  });
+});
+
+// CREATING AND RENDERING ELEMENTS
+function renderTasks() {
+  tasksWrapper.innerHTML = "";
+  if (tasks.length === 0) {
+    showEmptyState();
+    return;
+  }
+
+  tasks.forEach((task) => {
+    const taskCard = createTaskCard(task);
+    tasksWrapper.appendChild(taskCard);
+  });
+}
+
+function createTaskCard(task) {
+  const taskCard = document.createElement("div");
+  taskCard.className = "task-card";
+  taskCard.dataset.id = task.id;
+
+  // Create the task card content
+  taskCard.innerHTML = `
+    <div class="task-status">
+      <div class="status-circle ${task.completed ? "completed" : ""}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="${
+          task.completed ? "white" : "currentColor"
+        }" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      </div>
+      <div class="task-title">${task.title}</div>
+    </div>
+    <div class="task-description">${truncateText(task.description, 100)}</div>
+    <div class="task-info">
+        <span class="priority-info">Priority: <span class="${task.priority.toLowerCase()}">${task.priority}</span></span>
+        <span class="date-info">Created on: ${task.date}</span>
+    </div>
+  `;
+  // Add click event to select task
+  taskCard.addEventListener("click", () => {
+    selectTask(task.id);
+  });
+
+  // Add click event to toggle completion status
+  const statusCircle = taskCard.querySelector(".status-circle");
+  statusCircle.addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleTaskCompletion(task.id);
+  });
+
+  return taskCard;
+}
+
+// HANDELING EVENTS AND USER INTERACTIONS
+function selectTask(taskId) {
+  // Deselect all tasks
+  document.querySelectorAll(".task-card").forEach((card) => {
+    card.classList.remove("selected");
+  });
+
+  // Select the clicked task
+  const taskCard = document.querySelector(`.task-card[data-id="${taskId}"]`);
+  if (taskCard) {
+    taskCard.classList.add("selected");
+  }
+
+  // Fine the task data
+  const task = tasks.find((t) => t.id === taskId);
+  if (!task) return;
+
+  // Update the details panel
+  taskDetailsPanel.innerHTML = `
+    <div class="task-detail-header">
+      <h2>${task.title}</h2>
+      <div class="detail-meta">
+        <div class="detail-meta-item">
+          <span class="meta-label">Priority:</span> 
+          <span class="${task.priority.toLowerCase()}">${task.priority}</span>
+        </div>
+        <div class="detail-meta-item">
+          <span class="meta-label">Created on:</span> 
+          <span>${task.date}</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="detail-description">
+      <p>${task.description}</p>
+    </div>
+
+    <div class="action-buttons">
+      <button class="action-btn btn-secondary" id="editCurrentTaskBtn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+          </svg>
+        </button>
+        <button class="action-btn btn-primary" id="deleteCurrentTaskBtn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            <line x1="10" y1="11" x2="10" y2="17"></line>
+            <line x1="14" y1="11" x2="14" y2="17"></line>
+          </svg>
+        </button>
+    </div>
+  `;
+  // Add event listeners for edit and delete buttons
+  document
+    .getElementById("editCurrentTaskBtn")
+    .addEventListener("click", () => openEditTaskModal(taskId));
+  document
+    .getElementById("deleteCurrentTaskBtn")
+    .addEventListener("click", () => deleteTask(taskId));
+}
+
+// HELPER FUNCTIONS
+// truncate text with ellipsis
+function truncateText(text, maxLength) {
+  return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+}
+
+// show empty state when no tasks
+function showEmptyState() {
+  tasksWrapper.innerHTML = `
+    <div class="empty-state">
+      <p>No tasks found. Click "Add Task" to create your first task!</p>
+    </div>
+  `;
+
+  // clear details panel
+  taskDetailsPanel.innerHTML = "";
+}
+
+// Toggle task completion status
+function toggleTaskCompletion(taskId) {
+  const taskIndex = tasks.findIndex((t) => t.id === taskId);
+  if (taskIndex !==-1) {
+    tasks[taskIndex].completed = !tasks[taskIndex].completed;
+    
+    // update the UI
+    const statusCircle = document.querySelector(
+      `.task-card[data-id="${taskId}"] .status-circle`);
+    if (statusCircle) {
+      statusCircle.classList.toggle("completed", tasks[taskIndex].completed);
+    }
+
+    // Re-select the task to update details panel
+    selectTask(taskId);
+  }
+}
+
+// FORM HANDLING
+function openAddTaskModal() {
+  // reset form
+  editingTaskId = null;
+  modalTitle.textContent = "Add New Task";
+  taskTitleInput.value = "";
+  taskDescriptionInput.value = "";
+
+  const taskDateDisplayInput = document.getElementById("taskDate");       // MM-DD-YYYY (text)
+  const taskDatePickerInput = document.getElementById("taskDatePicker");  // YYYY-MM-DD (date)
+
+  // set default priority (Low)
+  document.querySelectorAll('input[name="priority"]').forEach((radio) => {
+    radio.checked = radio.value === "Low";
+  });
+
+  // show modal
+  taskModal.style.display = "flex";
+}
+
+//Open modal to edit existing task
+function openEditTaskModal(taskId) {
+  const task = tasks.find((t) => t.id === taskId);
+  if (!task) return;
+
+  editingTaskId = taskId;
+  modalTitle.textContent = "Edit Task";
+  taskTitleInput.value = task.title;
+  taskDescriptionInput.value = task.description;
+
+  // set date (task.date is assumed to be MM-DD-YYYY)
+  taskDateDisplayInput.value = task.date;
+  if (taskDatePickerInput) taskDatePickerInput.value = mdyToYmdLoose(task.date);
+
+  // set priority radio
+  document.querySelectorAll('input[name="priority"]').forEach((radio) => {
+    radio.checked = radio.value.toLowerCase() === task.priority.toLowerCase();
+  });
+
+  taskModal.style.display = "flex";
+}
+
+// SAVING AND VALIDATING FORM DATA
+function saveTask() {
+  // Validate Title
+  if (!taskTitleInput.value.trim()) {
+    alert("Please enter a task title.");
+    return;
+  }
+
+  // Get selected Priority
+  let selectedPriority = "Low"; // default
+  document.querySelectorAll('input[name="priority"]').forEach((radio) => {
+    if (radio.checked) {
+      selectedPriority = radio.value.charAt(0).toUpperCase() + radio.value.slice(1); // capitalize first letter
+    }
+  });
+
+  if (editingTaskId === null) {
+    // Create new task
+    const newTask = {
+      id: Date.now(),
+      title: taskTitleInput.value.trim(),
+      description: taskDescriptionInput.value.trim(),
+      priority: selectedPriority,
+      date: taskDateInput.value,
+      completed: false,
+    };
+    tasks.unshift(newTask); // add to the beginning
+    renderTasks();
+    selectTask(newTask.id);
+  } else {
+    // Update existing task
+    const taskIndex = tasks.findIndex((t) => t.id === editingTaskId);
+    if (taskIndex !== -1) {
+      tasks[taskIndex].title = taskTitleInput.value.trim();
+      tasks[taskIndex].description = taskDescriptionInput.value.trim();
+      tasks[taskIndex].priority = selectedPriority;
+      tasks[taskIndex].date = taskDateInput.value;
+      renderTasks();
+      selectTask(editingTaskId);
+    }
+  }
+  // close modal
+  closeModal();
+}
+
+function deleteTask(taskId) {
+  if (!confirm("Are you sure you want to delete this task?")) return;
+
+  const taskIndex = tasks.findIndex((t) => t.id === taskId);
+  if (taskIndex === -1) return;
+
+  tasks.splice(taskIndex, 1);
+  renderTasks();
+
+  if (tasks.length > 0) {
+    selectTask(tasks[0].id);
+  } else {
+    showEmptyState();
+  }
+}
+
+// SEARCH FUNCTIONALITY
+function searchTasks() {
+  const searchTerm = searchInput.value.toLowerCase().trim();
+
+  if (searchTerm === "") {
+    renderTasks();
+    if (tasks.length > 0) {
+      selectTask(tasks[0].id);
+    }
+    return;
+  }
+
+  const filteredTasks = tasks.filter((task) => {
+    task.title.toLowerCase().includes(searchTerm);
+  });
+
+  if (filteredTasks.length === 0) {
+    tasksWrapper.innerHTML = `
+      <div class="empty-state">
+        <p>No tasks match your search. Try a different keyword?</p>
+      </div>
+    `;
+    taskDetailsPanel.innerHTML = "";
+  } else {
+    tasksWrapper.innerHTML = "";
+    filteredTasks.forEach((task) => {
+      const taskCard = createTaskCard(task);
+      tasksWrapper.appendChild(taskCard);
+    });
+    selectTask(filteredTasks[0].id);
+  }
+}
+
+function closeModal(e) {
+  if (e) e.preventDefault();
+  taskModal.style.display = "none";
+}
+
+function mdyToYmdLoose(mdy) {
+  // expects MM-DD-YYYY
+  if (!mdy || !/^\d{2}-\d{2}-\d{4}$/.test(mdy)) return "";
+  const [m, d, y] = mdy.split("-");
+  return `${y}-${m}-${d}`;
+}
