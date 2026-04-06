@@ -78,17 +78,43 @@ const sampleTasks = [
 
 const TASKS_KEY = "tasksSimplified.tasks";
 
-taskCard.addEventListener("click", () => {
-  if (!requireLogin("view task details")) return;
-  selectTask(task.id);
-});
+// Must match /assets/auth.js
+const AUTH_KEY = "wellnessUser";
 
-const statusCircle = taskCard.querySelector(".status-circle");
-statusCircle.addEventListener("click", (e) => {
-  e.stopPropagation();
-  if (!requireLogin("complete tasks")) return;
-  toggleTaskCompletion(task.id);
-});
+function getLoggedInUser() {
+  try {
+    const raw = localStorage.getItem(AUTH_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function getLoggedInEmail() {
+  const user = getLoggedInUser();
+  return user?.email ? user.email.toLowerCase().trim() : null;
+}
+
+function isLoggedIn() {
+  return !!getLoggedInEmail();
+}
+
+function tasksStorageKey() {
+  const email = getLoggedInEmail();
+  return email ? `${TASKS_KEY}:${email}` : null;
+}
+
+// taskCard.addEventListener("click", () => {
+//   if (!requireLogin("view task details")) return;
+//   selectTask(task.id);
+// });
+
+// const statusCircle = taskCard.querySelector(".status-circle");
+// statusCircle.addEventListener("click", (e) => {
+//   e.stopPropagation();
+//   if (!requireLogin("complete tasks")) return;
+//   toggleTaskCompletion(task.id);
+// });
 
 function loadTasks() {
   const key = tasksStorageKey();
@@ -150,6 +176,9 @@ document.addEventListener("DOMContentLoaded", function () {
   } else {
     showEmptyState();
   }
+
+  // Hide the Add button when logged out
+  addTaskBtn.style.display = isLoggedIn() ? "inline-flex" : "none";
 
   // Event Listeners
   addTaskBtn.addEventListener("click", () => {
@@ -314,7 +343,7 @@ function selectTask(taskId) {
   `;
   // Add event listeners for edit and delete buttons
   if (isLoggedIn()) {
-  document.getElementById("editCurrentTaskBtn")
+  document
     .getElementById("editCurrentTaskBtn")
     .addEventListener("click", () => openEditTaskModal(taskId));
 
@@ -323,6 +352,7 @@ function selectTask(taskId) {
     .addEventListener("click", () => deleteTask(taskId));
 }
 }
+
 
 function openEditTaskModal(taskId) {
   if (!requireLogin("edit tasks")) return;
