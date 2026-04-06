@@ -50,11 +50,13 @@ function initAuth() {
     setUser({ email, name: name || email.split("@")[0] });
     authForm.reset();
     render();
+    window.dispatchEvent(new Event("auth:changed"));
   });
 
   logoutBtn.addEventListener("click", () => {
     clearUser();
     render();
+    window.dispatchEvent(new Event("auth:changed"));
   });
 
   render();

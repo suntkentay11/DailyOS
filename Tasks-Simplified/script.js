@@ -44,12 +44,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // If login state changes in another tab/window, refresh tasks
   window.addEventListener("storage", (e) => {
-    if (e.key === "wellnessUser") {
-      tasks = isLoggedIn() ? (loadTasks() ?? []) : [...sampleTasks];
-      renderTasks();
-      taskDetailsPanel.innerHTML = "";
-    }
+    if (e.key === "wellnessUser") refreshForAuthState();
   });
+
+  window.addEventListener("auth:changed", refreshForAuthState);
 });
 
 // 
@@ -147,6 +145,15 @@ let tasks = isLoggedIn() ? (loadTasks() ?? []) : [...sampleTasks];
 let editingTaskId = null;
 let activeTab = "inprogress"; // default tab
 
+function refreshForAuthState() {
+  tasks = isLoggedIn() ? (loadTasks() ?? []) : [...sampleTasks];
+  renderTasks();
+  taskDetailsPanel.innerHTML = "";
+
+  // show/hide Add button
+  addTaskBtn.style.display = isLoggedIn() ? "inline-flex" : "none";
+}
+
 function requireLogin(actionName = "do that") {
   if (isLoggedIn()) return true;
   alert(`You must log in to ${actionName}.`);
@@ -189,6 +196,7 @@ document.addEventListener("DOMContentLoaded", function () {
   saveTaskBtn.addEventListener("click", saveTask);
   if (searchButton) searchButton.addEventListener("click", searchTasks);
   if (searchInput) searchInput.addEventListener("input", searchTasks);
+  
 
   // TAB BUTTONS
   document.querySelectorAll(".tab-btn").forEach((btn) => {
