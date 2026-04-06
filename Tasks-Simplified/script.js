@@ -62,15 +62,35 @@ const sampleTasks = [
     description:
       "Go through all lessons inside Module 1 at your own pace. As you progress, make detailed notes to reinforce your understanding and practice writing the code alongside the instructor.",
     priority: "Extreme",
-    date: "01/05/2025",
+    date: "05-01-2025",
     completed: true,
   },
 ];
 
+const TASKS_KEY = "tasksSimplified.tasks";
+
+function loadTasks() {
+  try {
+    const raw = localStorage.getItem(TASKS_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    console.warn("Failed to load tasks from localStorage", e);
+    return null;
+  }
+}
+
+function saveTasks() {
+  try {
+    localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+  } catch (e) {
+    console.warn("Failed to save tasks to localStorage", e);
+  }
+}
+
 // INITIAL SET UP AND DOM ELEMENTS
 
 // Store tasks in memory
-let tasks = [...sampleTasks];
+let tasks = loadTasks() ?? [...sampleTasks];
 let editingTaskId = null;
 let activeTab = "inprogress"; // default tab
 
@@ -311,6 +331,7 @@ function toggleTaskCompletion(taskId) {
 
   // redraw list (so it moves between tabs)
   renderTasks();
+  saveTasks();
 
   // pick a task to show in details (first visible in current tab)
   const visible = getVisibleTasks();
@@ -391,6 +412,7 @@ function saveTask() {
       completed: false,
     };
     tasks.unshift(newTask); // add to the beginning
+    saveTasks();
     renderTasks();
     selectTask(newTask.id);
   } else {
@@ -401,6 +423,7 @@ function saveTask() {
       tasks[taskIndex].description = taskDescriptionInput.value.trim();
       tasks[taskIndex].priority = selectedPriority;
       tasks[taskIndex].date = taskDateDisplayInput.value;
+      saveTasks();
       renderTasks();
       selectTask(editingTaskId);
     }
@@ -416,6 +439,7 @@ function deleteTask(taskId) {
   if (taskIndex === -1) return;
 
   tasks.splice(taskIndex, 1);
+  saveTasks();
   renderTasks();
 
   if (tasks.length > 0) {
