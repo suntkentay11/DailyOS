@@ -41,6 +41,15 @@ document.addEventListener("DOMContentLoaded", () => {
   pickerInput.addEventListener("change", () => {
     displayInput.value = ymdToMdy(pickerInput.value);
   });
+
+  // If login state changes in another tab/window, refresh tasks
+  window.addEventListener("storage", (e) => {
+    if (e.key === "wellnessUser") {
+      tasks = isLoggedIn() ? (loadTasks() ?? []) : [...sampleTasks];
+      renderTasks();
+      taskDetailsPanel.innerHTML = "";
+    }
+  });
 });
 
 // 
@@ -69,9 +78,24 @@ const sampleTasks = [
 
 const TASKS_KEY = "tasksSimplified.tasks";
 
+taskCard.addEventListener("click", () => {
+  if (!requireLogin("view task details")) return;
+  selectTask(task.id);
+});
+
+const statusCircle = taskCard.querySelector(".status-circle");
+statusCircle.addEventListener("click", (e) => {
+  e.stopPropagation();
+  if (!requireLogin("complete tasks")) return;
+  toggleTaskCompletion(task.id);
+});
+
 function loadTasks() {
+  const key = tasksStorageKey();
+  if (!key) return null; // not logged in => no saved tasks
+
   try {
-    const raw = localStorage.getItem(TASKS_KEY);
+    const raw = localStorage.getItem(key);
     return raw ? JSON.parse(raw) : null;
   } catch (e) {
     console.warn("Failed to load tasks from localStorage", e);
@@ -80,8 +104,11 @@ function loadTasks() {
 }
 
 function saveTasks() {
+  const key = tasksStorageKey();
+  if (!key) return; // not logged in => do not save
+
   try {
-    localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+    localStorage.setItem(key, JSON.stringify(tasks));
   } catch (e) {
     console.warn("Failed to save tasks to localStorage", e);
   }
@@ -90,9 +117,15 @@ function saveTasks() {
 // INITIAL SET UP AND DOM ELEMENTS
 
 // Store tasks in memory
-let tasks = loadTasks() ?? [...sampleTasks];
+let tasks = isLoggedIn() ? (loadTasks() ?? []) : [...sampleTasks];
 let editingTaskId = null;
 let activeTab = "inprogress"; // default tab
+
+function requireLogin(actionName = "do that") {
+  if (isLoggedIn()) return true;
+  alert(`You must log in to ${actionName}.`);
+  return false;
+}
 
 // DOM Elements
 const taskModal = document.getElementById("taskModal");
@@ -119,7 +152,10 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Event Listeners
-  addTaskBtn.addEventListener("click", openAddTaskModal);
+  addTaskBtn.addEventListener("click", () => {
+    if (!requireLogin("add tasks")) return;
+    openAddTaskModal();
+  });
   closeModalBtn.addEventListener("click", closeModal);
   saveTaskBtn.addEventListener("click", saveTask);
   if (searchButton) searchButton.addEventListener("click", searchTasks);
@@ -205,13 +241,14 @@ function createTaskCard(task) {
   `;
   // Add click event to select task
   taskCard.addEventListener("click", () => {
-    selectTask(task.id);
+  if (!requireLogin("view task details")) return;
+  selectTask(task.id);
   });
 
-  // Add click event to toggle completion status
   const statusCircle = taskCard.querySelector(".status-circle");
   statusCircle.addEventListener("click", (e) => {
     e.stopPropagation();
+    if (!requireLogin("complete tasks")) return;
     toggleTaskCompletion(task.id);
   });
 
@@ -255,13 +292,15 @@ function selectTask(taskId) {
       <p>${task.description}</p>
     </div>
 
-    <div class="action-buttons">
-      <button class="action-btn btn-secondary" id="editCurrentTaskBtn">
+        ${isLoggedIn() ? `
+      <div class="action-buttons">
+        <button class="action-btn btn-secondary" id="editCurrentTaskBtn">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
           </svg>
         </button>
+
         <button class="action-btn btn-primary" id="deleteCurrentTaskBtn">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="3 6 5 6 21 6"></polyline>
@@ -270,18 +309,23 @@ function selectTask(taskId) {
             <line x1="14" y1="11" x2="14" y2="17"></line>
           </svg>
         </button>
-    </div>
+      </div>
+    ` : ""}
   `;
   // Add event listeners for edit and delete buttons
-  document
+  if (isLoggedIn()) {
+  document.getElementById("editCurrentTaskBtn")
     .getElementById("editCurrentTaskBtn")
     .addEventListener("click", () => openEditTaskModal(taskId));
+
   document
     .getElementById("deleteCurrentTaskBtn")
     .addEventListener("click", () => deleteTask(taskId));
 }
+}
 
 function openEditTaskModal(taskId) {
+  if (!requireLogin("edit tasks")) return;
   const task = tasks.find((t) => t.id === taskId);
   if (!task) return;
 
@@ -324,6 +368,7 @@ function showEmptyState() {
 
 // Toggle task completion status
 function toggleTaskCompletion(taskId) {
+  if (!requireLogin("complete tasks")) return;
   const taskIndex = tasks.findIndex((t) => t.id === taskId);
   if (taskIndex === -1) return;
 
@@ -337,26 +382,6 @@ function toggleTaskCompletion(taskId) {
   const visible = getVisibleTasks();
   if (visible.length > 0) selectTask(visible[0].id);
   else taskDetailsPanel.innerHTML = "";
-}
-
-// FORM HANDLING
-function openAddTaskModal() {
-  // reset form
-  editingTaskId = null;
-  modalTitle.textContent = "Add New Task";
-  taskTitleInput.value = "";
-  taskDescriptionInput.value = "";
-
-  const taskDateDisplayInput = document.getElementById("taskDate");       // MM-DD-YYYY (text)
-  const taskDatePickerInput = document.getElementById("taskDatePicker");  // YYYY-MM-DD (date)
-
-  // set default priority (Low)
-  document.querySelectorAll('input[name="priority"]').forEach((radio) => {
-    radio.checked = radio.value === "Low";
-  });
-
-  // show modal
-  taskModal.style.display = "flex";
 }
 
 //Open modal to edit existing task
@@ -385,6 +410,7 @@ function openAddTaskModal() {
 
 // SAVING AND VALIDATING FORM DATA
 function saveTask() {
+  if (!requireLogin("save tasks")) return;
   // Validate Title
   if (!taskTitleInput.value.trim()) {
     alert("Please enter a task title.");
@@ -433,6 +459,7 @@ function saveTask() {
 }
 
 function deleteTask(taskId) {
+  if (!requireLogin("delete tasks")) return;
   if (!confirm("Are you sure you want to delete this task?")) return;
 
   const taskIndex = tasks.findIndex((t) => t.id === taskId);
