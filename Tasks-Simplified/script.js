@@ -42,12 +42,12 @@ document.addEventListener("DOMContentLoaded", () => {
     displayInput.value = ymdToMdy(pickerInput.value);
   });
 
-  // If login state changes in another tab/window, refresh tasks
-  window.addEventListener("storage", (e) => {
-    if (e.key === "wellnessUser") refreshForAuthState();
-  });
+  // // If login state changes in another tab/window, refresh tasks
+  // window.addEventListener("storage", (e) => {
+  //   if (e.key === "wellnessUser") refreshForAuthState();
+  // });
 
-  window.addEventListener("auth:changed", refreshForAuthState);
+  // window.addEventListener("auth:changed", refreshForAuthState);
 });
 
 // 
@@ -76,12 +76,10 @@ const sampleTasks = [
 
 const TASKS_KEY = "tasksSimplified.tasks";
 
-// Must match /assets/auth.js
-const AUTH_KEY = "wellnessUser";
 
 function getLoggedInUser() {
   try {
-    const raw = localStorage.getItem(AUTH_KEY);
+  const raw = localStorage.getItem("wellnessUser");
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
@@ -146,6 +144,7 @@ let editingTaskId = null;
 let activeTab = "inprogress"; // default tab
 
 function refreshForAuthState() {
+  if (!tasksWrapper || !taskDetailsPanel || !addTaskBtn) return;
   tasks = isLoggedIn() ? (loadTasks() ?? []) : [...sampleTasks];
   renderTasks();
   taskDetailsPanel.innerHTML = "";
@@ -186,6 +185,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Hide the Add button when logged out
   addTaskBtn.style.display = isLoggedIn() ? "inline-flex" : "none";
+
+  // React immediately to login/logout in THIS tab
+  window.addEventListener("auth:changed", () => {
+    refreshForAuthState();
+  });
+
+  // React to login/logout in OTHER tabs/windows
+  window.addEventListener("storage", (e) => {
+    if (e.key === "wellnessUser") refreshForAuthState();
+  });
 
   // Event Listeners
   addTaskBtn.addEventListener("click", () => {

@@ -18,6 +18,7 @@
     align-items: center;
     text-align: center;
     gap: 8px;
+    margin-top: 32px;
 }
 
 .profile__img{
@@ -29,6 +30,7 @@
     justify-content: center;
     align-items: center;
     margin: 0 auto;
+    margin-bottom: 8px;
 }
 
 .profile__img img{
@@ -44,14 +46,14 @@
     font-weight: 600;
     color: #2f2f33;
     font-family: "Inter", sans-serif;
-    margin-bottom: 8px;
+    margin: 8px 0;
 }
 
 .profile__email{
     font-size: 14px;
     color: #2f2f33;
     opacity: 0.7;
-    margin-bottom: 8px;
+    margin: 8px 0;
 }
 
 #auth-logged-in{
